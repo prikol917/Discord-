@@ -1,36 +1,43 @@
-# This is a basic workflow to help you get started with Actions
+ append(line)
 
-name: CI
+        for entry in slots_raw:
+            try:
+                num, name = entry.split(" ", 1)
+                num = int(num)
+                current_slots[num] = {"name": name, "user": None}
+            except:
+                pass
 
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+        embed = discord.Embed(
+            title="Запись на поход",
+            description="\n".join(header),
+            color=0x00ff99
+        )
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+        last_embed_message = await ctx.send(embed=embed, view=SignupView())
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+        try:
+            await ctx.message.delete()
+        except discord.Forbidden:
+            await ctx.send("⚠️ У меня нет прав удалять сообщения. Добавь 'Manage Messages'.")
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+# ==============================
+# Авто-перезапуск бота
+# ==============================
+async def run_bot():
+    while True:
+        try:
+            bot = commands.Bot(command_prefix="!", intents=intents)
+            setup_commands(bot)
+            print("🔹 Подключаемся к Discord...")
+            await bot.start(TOKEN)
+        except Exception:
+            print("❌ Ошибка в боте, перезапуск через 5 секунд")
+            traceback.print_exc()
+            await asyncio.sleep(5)
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+# ==============================
+# Запуск
+# ==============================
+if name == "__main__":
+    asyncio.run(run_bot())
